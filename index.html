@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Plano de Estudos - CFS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 {
+      color: #e0e0e0;
+      text-align: center;
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 1.6em;
+      letter-spacing: -0.5px;
+    }
+    #listaMaterias {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      max-width: 800px;
+    }
+    .materia { 
+      background-color: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 10px;
+      height: fit-content;
+      overflow-y: auto;
+    }
+    .materia-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      position: sticky;
+      top: 0;
+      background-color: transparent;
+      z-index: 1;
+    }
+    .materia-titulo {
+      font-size: 1.05em;
+      font-weight: 600;
+      color: #e0e0e0;
+      letter-spacing: -0.5px;
+    }
+    .toggle-button {
+      background: none;
+      border: none;
+      color: #d4d4d4;
+      cursor: pointer;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+    .toggle-button.collapsed {
+      transform: rotate(-90deg);
+    }
+    .toggle-button::before {
+      content: "▶";
+      font-size: 9px;
+    }
+    .materia-conteudo {
+      display: block;
+    }
+    .materia-conteudo.hidden {
+      display: none;
+    }
+    .lei {
+      margin-left: 20px;
+      padding: 8px;
+      background-color: transparent;
+      border-radius: 0;
+      margin-bottom: 8px;
+      font-size: 0.85em;
+      line-height: 1.35;
+      color: #d4d4d4;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .data-estudo {
+      font-size: 0.75em;
+      color: #a0a0a0;
+      margin-left: 10px;
+      text-decoration: none !important;
+      opacity: 1 !important;
+      color: #a0a0a0 !important;
+    }
+    .revisao-contador {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: auto;
+      background-color: #2d2d2d;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+    }
+    .revisao-btn {
+      background: none;
+      border: none;
+      color: #d4d4d4;
+      cursor: pointer;
+      padding: 2px 6px;
+      font-size: 0.9em;
+      border-radius: 3px;
+      transition: background-color 0.2s;
+    }
+    .revisao-btn:hover {
+      background-color: #3d3d3d;
+    }
+    .revisao-btn:disabled {
+      color: #666;
+      cursor: not-allowed;
+    }
+    .revisao-numero {
+      min-width: 20px;
+      text-align: center;
+    }
+    .item {
+      margin-left: 35px;
+      padding: 6px;
+      border-left: 2px solid #404040;
+      font-size: 0.8em;
+      line-height: 1.35;
+      color: #d4d4d4;
+    }
+    .topico {
+      margin-left: 50px;
+      padding: 4px;
+      color: #a0a0a0;
+      font-size: 0.8em;
+      line-height: 1.35;
+    }
+    .estudada {
+      color: #666;
+    }
+    .estudada .lei,
+    .estudada .item,
+    .estudada .topico {
+      opacity: 0.7;
+      text-decoration: none !important;
+    }
+    .estudada .data-estudo,
+    .estudada .lei .data-estudo,
+    .estudada .item .data-estudo,
+    .estudada .topico .data-estudo {
+      text-decoration: none !important;
+      opacity: 1 !important;
+      color: #a0a0a0 !important;
+    }
+    input[type="checkbox"] {
+      margin-right: 6px;
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+      accent-color: #007acc;
+    }
+    /* Estilos específicos para cada matéria */
+    .materia:nth-child(1) .materia-header {
+      background-color: #1e3a5f;
+    }
+    .materia:nth-child(2) .materia-header {
+      background-color: #1e3a5f;
+    }
+    .materia:nth-child(3) .materia-header {
+      background-color: #1e3a5f;
+    }
+    .materia:nth-child(4) .materia-header {
+      background-color: #1e3a5f;
+    }
+    /* Estilização da barra de rolagem */
+    .materia::-webkit-scrollbar {
+      width: 8px;
+    }
+    .materia::-webkit-scrollbar-track {
+      background: #1e1e1e;
+      border-radius: 4px;
+    }
+    .materia::-webkit-scrollbar-thumb {
+      background: #424242;
+      border-radius: 4px;
+    }
+    .materia::-webkit-scrollbar-thumb:hover {
+      background: #4f4f4f;
+    }
+    .progresso-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      font-size: 0.8em;
+      color: #a0a0a0;
+    }
+    .progresso-bar {
+      width: 100px;
+      height: 6px;
+      background-color: #2d2d2d;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progresso-fill {
+      height: 100%;
+      background-color: #2ecc71;
+      transition: width 0.3s ease;
+    }
+    .progresso-texto {
+      min-width: 45px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <h1>Plano de Estudos - CFS</h1>
+  
+  <div id="listaMaterias"></div>
+
+  <script>
+    const materias = [
+      {
+        nome: "1. LÍNGUA PORTUGUESA",
+        estudada: false,
+        leis: [
+          {
+            nome: "1.1 Domínio da expressão escrita (redação)",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.2 Adequação conceitual",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.3 Pertinência, relevância e articulação dos argumentos",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.4 Seleção vocabular",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.5 Estudo de textos (questões objetivas sobre textos)",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.6 Ortografia",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.7 Acentuação gráfica",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.8 Pontuação",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.9 Estrutura e formação de palavras",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.10 Classes de palavras",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.11 Frase, oração e período. Termos da oração. Período composto. Orações reduzidas",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.12 Emprego de nomes e pronomes. Funções sintáticas dos pronomes relativos. Colocação pronominal",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.13 Emprego de tempos e modos verbais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.14 Regência verbal e nominal",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.15 Concordância verbal e nominal",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.16 Crase",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.17 Sílaba e tonicidade",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.18 Fonemas",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.19 Notações léxicas",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.20 Estilística",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.21 Figuras de linguagem",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.22 Linguagem: como instrumento de ação e interação presente em todas as atividades humanas",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.23 Funções da linguagem na comunicação",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.24 Diversidade linguística (língua padrão, língua não padrão)",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.25 Leitura: capacidade de compreensão e interpretação do contexto social, econômico e cultural",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.26 Estrutura textual: organização e hierarquia das ideias: ideia principal e ideias secundárias",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.27 Relações lógicas e formais entre elementos do texto: a coerência e a coesão textual",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.28 Defesa do ponto de vista: a argumentação e a intencionalidade",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.29 Semântica: o significado das palavras e das sentenças: linguagem denotativa e conotativa; sinonímia, antonímia e polissemia",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.30 Tipologia textual e gêneros textuais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "1.31 Vícios de linguagem e qualidade da boa linguagem",
+            estudada: false,
+            itens: []
+          }
+        ]
+      },
+      {
+        nome: "2. DOUTRINA OPERACIONAL",
+        estudada: false,
+        leis: [
+          {
+            nome: "2.1 Diretriz Geral para Emprego Operacional",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.2 Regula a atuação do policial militar primeiro interventor",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.3 Regula a atuação da Patrulha Rural",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.4 Regula o emprego da Polícia Militar com vistas à prevenção e repressão aos crimes de homicídio - 2ª edição",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.5 das Câmeras Operacionais Portáteis",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.6 Atuação policial em face do crime de abuso e maus-tratos aos animais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.7 (MTP 01) – Intervenção Policial, Processo de Comunicação e Uso da Força",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.8 (MTP 02) – Abordagem a Pessoas",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.9 (MTP 03) – Blitz Policial",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.10 (MTP 04) – Abordagem a Veículos",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.11 (MTP 05) – Escoltas Policiais e Conduções Diversas",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.12 Descriminalização do porte de Cannabis sativa (maconha) para consumo pessoal",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.13 Protocolo de atuação para o Atendimento de Criança e Adolescente Vítima ou Testemunha de Violência",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.14 Atuação da Polícia Militar no atendimento às vítimas de crimes cibernéticos",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.15 Procedimentos operacionais para lavratura do Termo Circunstanciado de Ocorrências (TCO) pela Polícia Militar de Minas Gerais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.16 Armazenamento adequado de materiais decorrentes de TCO",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.17 Diretriz de Segurança para o Emprego Operacional",
+            estudada: false,
+            itens: []
+          }
+        ]
+      },
+      {
+        nome: "3. LEGISLAÇÃO INSTITUCIONAL",
+        estudada: false,
+        leis: [
+          {
+            nome: "3.1 Lei Estadual nº 5.301, de 16/10/1969 - Contém o Estatuto dos Militares do Estado de Minas Gerais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.2 Lei Estadual nº 14.310, de 19/06/2002 – Dispõe sobre o Código de Ética e Disciplina dos Militares do Estado de Minas Gerais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.3 MAPPA",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.4 Dispõe sobre a cautela fixa de arma de fogo pertencente à Polícia Militar de Minas Gerais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.5 Manual de Gestão de Imóvel da Polícia Militar de Minas Gerais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.6 Manual de Gerenciamento de Frota da Polícia Militar de Minas Gerais - 2ª Edição",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.7 Plano Estratégico da Polícia Militar de Minas Gerais para o quadriênio 2024-2027",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.8 Manual de Polícia Judiciária das Instituições Militares do Estado de Minas Gerais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.9 Instrução Conjunta de Corregedorias nº 01 (ICCPM/BM nº 01/14) de 03/02/2014",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.10 Ofício Circular nº 671.1.1/2023 - CPM, de 28/06/2023",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.11 Ofício Circular nº 00945.1.1/2023 - CPM, de 19/10/2023",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.12 Memorando Técnico nº 01/21 - DAL, de 05/11/2021",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "3.13 Ofício Circular nº 1067.1.1/2023 - CPM, de 29/09/2023",
+            estudada: false,
+            itens: []
+          }
+        ]
+      },
+      {
+        nome: "4. LEGISLAÇÃO JURÍDICA",
+        estudada: false,
+        leis: [
+          {
+            nome: "4.1 Constituição da República Federativa do Brasil",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.2 Constituição do Estado de Minas Gerais",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.3 Decreto-Lei nº 1.001, de 21/10/1969 – Código Penal Militar",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.4 Decreto-Lei nº 1.002, de 21/10/1969 - Código de Processo Penal Militar",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.5 Decreto-Lei nº 2.848, de 07/12/40 - Código Penal",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.6 Decreto-Lei nº 3.689, de 03/10/1941 - Código de Processo Penal",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.7 Decreto-lei nº 4.657, de 04/09/1942 - Lei de Introdução às normas do Direito Brasileiro",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.8 Lei Federal nº 8.429, de 02/06/1992 - Dispõe sobre as sanções aplicáveis aos agentes públicos nos casos de enriquecimento ilícito no exercício de mandato, cargo, emprego ou função na administração pública direta, indireta ou fundacional",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.9 Lei Federal nº 10.826, de 22/12/2003 - Dispõe sobre registro, posse e comercialização de armas de fogo e munição, sobre o Sistema Nacional de Armas - Sinarm",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.10 Lei Federal nº 11.343, de 23/08/2006 - Institui o Sistema Nacional de Políticas Públicas sobre Drogas - Sisnad; prescreve medidas para prevenção do uso indevido, atenção e reinserção social de usuários e dependentes de drogas",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "4.11 Lei Federal nº 13.869, de 05/09/2019 - Define abuso de autoridade e dispõe sobre as sanções administrativas, civis e penais aplicáveis aos agentes públicos que o cometem",
+            estudada: false,
+            itens: []
+          }
+        ]
+      }
+    ];
+
+    function toggleMateria(materiaIndex) {
+      const conteudo = document.getElementById(`materia-${materiaIndex}-conteudo`);
+      const button = document.getElementById(`toggle-${materiaIndex}`);
+      conteudo.classList.toggle('hidden');
+      button.classList.toggle('collapsed');
+    }
+
+    function marcarComoEstudada(tipo, materiaIndex, leiIndex = null, itemIndex = null, topicoIndex = null) {
+      const data = new Date().toLocaleDateString('pt-BR');
+      switch(tipo) {
+        case 'lei':
+          materias[materiaIndex].leis[leiIndex].estudada = !materias[materiaIndex].leis[leiIndex].estudada;
+          materias[materiaIndex].leis[leiIndex].dataEstudo = materias[materiaIndex].leis[leiIndex].estudada ? data : null;
+          break;
+        case 'item':
+          materias[materiaIndex].leis[leiIndex].itens[itemIndex].estudada = !materias[materiaIndex].leis[leiIndex].itens[itemIndex].estudada;
+          materias[materiaIndex].leis[leiIndex].itens[itemIndex].dataEstudo = materias[materiaIndex].leis[leiIndex].itens[itemIndex].estudada ? data : null;
+          break;
+        case 'topico':
+          materias[materiaIndex].leis[leiIndex].itens[itemIndex].topicos[topicoIndex].estudada = !materias[materiaIndex].leis[leiIndex].itens[itemIndex].topicos[topicoIndex].estudada;
+          materias[materiaIndex].leis[leiIndex].itens[itemIndex].topicos[topicoIndex].dataEstudo = materias[materiaIndex].leis[leiIndex].itens[itemIndex].topicos[topicoIndex].estudada ? data : null;
+          break;
+      }
+      salvarEstado();
+      atualizarLista();
+    }
+
+    function salvarEstado() {
+      localStorage.setItem('estadoMaterias', JSON.stringify(materias));
+    }
+
+    function carregarEstado() {
+      const estadoSalvo = localStorage.getItem('estadoMaterias');
+      if (estadoSalvo) {
+        const dadosSalvos = JSON.parse(estadoSalvo);
+        // Mescla os dados salvos com a estrutura original
+        materias.forEach((materia, materiaIndex) => {
+          if (dadosSalvos[materiaIndex]) {
+            materia.leis.forEach((lei, leiIndex) => {
+              if (dadosSalvos[materiaIndex].leis[leiIndex]) {
+                const leiSalva = dadosSalvos[materiaIndex].leis[leiIndex];
+                lei.estudada = leiSalva.estudada;
+                lei.dataEstudo = leiSalva.dataEstudo;
+                lei.revisoes = leiSalva.revisoes;
+                lei.datasEstudo = leiSalva.datasEstudo;
+              }
+            });
+          }
+        });
+      }
+    }
+
+    function calcularProgressoMateria(materia) {
+      let total = 0;
+      let estudados = 0;
+      
+      materia.leis.forEach(lei => {
+        total++;
+        if (lei.estudada) estudados++;
+      });
+      
+      return total > 0 ? Math.round((estudados / total) * 100) : 0;
+    }
+
+    function atualizarLista() {
+      const lista = document.getElementById('listaMaterias');
+      lista.innerHTML = '';
+      
+      materias.forEach((materia, materiaIndex) => {
+        const progresso = calcularProgressoMateria(materia);
+        const materiaDiv = document.createElement('div');
+        materiaDiv.className = 'materia';
+        
+        let html = `
+          <div class="materia-header">
+            <button id="toggle-${materiaIndex}" class="toggle-button" onclick="toggleMateria(${materiaIndex})"></button>
+            <div class="materia-titulo">${materia.nome}</div>
+            <div class="progresso-container">
+              <div class="progresso-bar">
+                <div class="progresso-fill" style="width: ${progresso}%"></div>
+              </div>
+              <span class="progresso-texto">${progresso}%</span>
+            </div>
+          </div>
+          <div id="materia-${materiaIndex}-conteudo" class="materia-conteudo">
+        `;
+
+        materia.leis.forEach((lei, leiIndex) => {
+          const datasEstudo = lei.datasEstudo || [];
+          const datasHtml = datasEstudo.length > 0 
+            ? `<span class="data-estudo">(${datasEstudo.join(', ')})</span>` 
+            : '';
+
+          html += `
+            <div class="lei ${lei.estudada ? 'estudada' : ''}">
+              <input type="checkbox" ${lei.estudada ? 'checked' : ''} 
+                onclick="marcarComoEstudada('lei', ${materiaIndex}, ${leiIndex})">
+              ${lei.nome}
+              ${datasHtml}
+              <div class="revisao-contador">
+                <button class="revisao-btn" onclick="decrementarRevisao(${materiaIndex}, ${leiIndex})" ${!lei.revisoes ? 'disabled' : ''}>-</button>
+                <span class="revisao-numero">${lei.revisoes || 0}</span>
+                <button class="revisao-btn" onclick="incrementarRevisao(${materiaIndex}, ${leiIndex})" ${lei.revisoes >= 5 ? 'disabled' : ''}>+</button>
+              </div>
+            </div>
+          `;
+
+          lei.itens.forEach((item, itemIndex) => {
+            html += `
+              <div class="item ${item.estudada ? 'estudada' : ''}">
+                <input type="checkbox" ${item.estudada ? 'checked' : ''} 
+                  onclick="marcarComoEstudada('item', ${materiaIndex}, ${leiIndex}, ${itemIndex})">
+                ${item.nome}
+                ${item.estudada && item.dataEstudo ? `<span class="data-estudo">(${item.dataEstudo})</span>` : ''}
+              </div>
+            `;
+
+            item.topicos.forEach((topico, topicoIndex) => {
+              html += `
+                <div class="topico ${topico.estudada ? 'estudada' : ''}">
+                  <input type="checkbox" ${topico.estudada ? 'checked' : ''} 
+                    onclick="marcarComoEstudada('topico', ${materiaIndex}, ${leiIndex}, ${itemIndex}, ${topicoIndex})">
+                  ${topico.nome}
+                  ${topico.estudada && topico.dataEstudo ? `<span class="data-estudo">(${topico.dataEstudo})</span>` : ''}
+                </div>
+              `;
+            });
+          });
+        });
+
+        html += '</div>';
+        materiaDiv.innerHTML = html;
+        lista.appendChild(materiaDiv);
+      });
+    }
+
+    function incrementarRevisao(materiaIndex, leiIndex) {
+      if (!materias[materiaIndex].leis[leiIndex].revisoes) {
+        materias[materiaIndex].leis[leiIndex].revisoes = 0;
+        materias[materiaIndex].leis[leiIndex].datasEstudo = [];
+      }
+      if (materias[materiaIndex].leis[leiIndex].revisoes < 5) {
+        materias[materiaIndex].leis[leiIndex].revisoes++;
+        materias[materiaIndex].leis[leiIndex].datasEstudo.push(new Date().toLocaleDateString('pt-BR'));
+        salvarEstado();
+        atualizarLista();
+      }
+    }
+
+    function decrementarRevisao(materiaIndex, leiIndex) {
+      if (materias[materiaIndex].leis[leiIndex].revisoes > 0) {
+        materias[materiaIndex].leis[leiIndex].revisoes--;
+        materias[materiaIndex].leis[leiIndex].datasEstudo.pop();
+        salvarEstado();
+        atualizarLista();
+      }
+    }
+
+    // Inicializar a lista
+    carregarEstado();
+    atualizarLista();
+  </script>
+</body>
+</html>
+
