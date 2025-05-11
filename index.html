@@ -223,6 +223,47 @@
       min-width: 45px;
       text-align: right;
     }
+    /* Responsividade para celular */
+    @media (max-width: 700px) {
+      body {
+        padding: 8px;
+        max-width: 100vw;
+      }
+      #listaMaterias {
+        max-width: 100vw;
+        padding: 4px;
+        gap: 10px;
+      }
+      .materia-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 8px 4px;
+      }
+      .materia-titulo {
+        font-size: 1em;
+      }
+      .progresso-container {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .progresso-bar {
+        width: 70px;
+      }
+      .lei, .item, .topico {
+        margin-left: 8px;
+        padding: 4px 2px;
+        font-size: 0.95em;
+      }
+      .materia {
+        padding: 4px;
+      }
+      h1 {
+        font-size: 1.1em;
+        margin-bottom: 12px;
+      }
+    }
   </style>
 </head>
 <body>
