@@ -37,33 +37,35 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      padding: 20px;
-      max-width: 800px;
+      padding: 20px 0;
+      max-width: 700px;
+      margin: 0 auto;
     }
-    .materia { 
-      background-color: transparent;
-      border-radius: 0;
+    .materia {
+      background: transparent;
+      border-radius: 6px;
       box-shadow: none;
-      padding: 10px;
+      padding: 0;
       height: fit-content;
       overflow-y: auto;
+      margin: 0 auto;
+      width: 100%;
     }
     .materia-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 15px;
-      padding: 10px;
-      border-bottom: 1px solid #333;
-      position: sticky;
-      top: 0;
-      background-color: transparent;
+      margin-bottom: 0;
+      padding: 14px 22px 14px 18px;
+      border-bottom: none;
+      background-color: rgba(30,58,95,0.9);
       z-index: 1;
+      border-radius: 6px 6px 0 0;
     }
     .materia-titulo {
       font-size: 1.05em;
       font-weight: 600;
-      color: #e0e0e0;
+      color: #fff;
       letter-spacing: -0.5px;
     }
     .toggle-button {
@@ -256,30 +258,30 @@
       background: none !important;
       padding: 8px 0 4px 0;
     }
-    .btn-reset, .btn-concluir, .btn-limpar {
-      background: #333;
-      color: #fff;
+    .btn-concluir, .btn-limpar, .btn-adicionar {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(90deg, #f8fafc 60%, #e3e8ee 100%);
+      color: #1e3a5f;
       border: none;
-      border-radius: 4px;
-      padding: 3px 10px;
-      font-size: 0.8em;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-reset:hover, .btn-concluir:hover, .btn-limpar:hover {
-      background: #007acc;
-    }
-    .btn-concluir, .btn-limpar {
-      background: #fff !important;
-      color: #222 !important;
-      border: 1px solid #bbb;
+      border-radius: 14px;
+      padding: 2px 8px;
+      font-size: 0.82em;
       font-weight: 600;
-      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(30,58,95,0.05);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      outline: none;
+      min-height: 24px;
     }
-    .btn-concluir:hover, .btn-limpar:hover {
-      background: #f0f0f0 !important;
-      color: #007acc !important;
-      border: 1px solid #007acc;
+    .btn-concluir:hover, .btn-limpar:hover, .btn-adicionar:hover {
+      background: linear-gradient(90deg, #e3e8ee 60%, #f8fafc 100%);
+      color: #007acc;
+      box-shadow: 0 2px 6px rgba(30,58,95,0.10);
+    }
+    .btn-concluir::before, .btn-limpar::before, .btn-adicionar::before {
+      font-size: 1em;
     }
     /* Responsividade para celular */
     @media (max-width: 700px) {
@@ -322,12 +324,120 @@
         margin-bottom: 12px;
       }
     }
+    .questao-tabela {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 18px;
+      background: rgba(30,30,30,0.7);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .questao-tabela th, .questao-tabela td {
+      border: 1px solid #333;
+      padding: 8px 6px;
+      text-align: center;
+      color: #fff;
+      font-size: 0.98em;
+    }
+    .questao-tabela th {
+      background: rgba(60,60,60,0.7);
+      color: #fff;
+      font-weight: 600;
+    }
+    .questao-tabela input[type="text"], .questao-tabela input[type="number"] {
+      width: 90%;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 3px;
+      padding: 2px 4px;
+      font-size: 0.97em;
+      text-align: center;
+    }
+    .questao-tabela .btn-remover {
+      background: #c0392b;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      margin-left: 2px;
+    }
+    .questao-tabela .btn-remover:hover {
+      background: #e74c3c;
+    }
+    .questao-tabela .btn-adicionar {
+      background: #007acc;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 4px 12px;
+      cursor: pointer;
+      font-size: 0.97em;
+      margin: 8px 0 0 0;
+    }
+    .questao-tabela .percent-verde {
+      background: #2ecc71 !important;
+      color: #222 !important;
+      font-weight: bold;
+    }
+    .questao-tabela .percent-amarelo {
+      background: #f1c40f !important;
+      color: #222 !important;
+      font-weight: bold;
+    }
+    .questao-tabela .percent-vermelho {
+      background: #e74c3c !important;
+      color: #fff !important;
+      font-weight: bold;
+    }
+    .questao-expansivel {
+      background: rgba(30,58,95,0.9);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.05em;
+      letter-spacing: -0.5px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      padding: 14px 22px 14px 18px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      transition: background 0.2s;
+      gap: 10px;
+    }
+    .questao-expansivel:hover {
+      background: #24508a;
+    }
+    .questao-conteudo {
+      display: none;
+      margin-bottom: 18px;
+    }
+    .questao-conteudo.ativa {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <h1>Plano de Estudos - CFS</h1>
   
   <div id="listaMaterias"></div>
+  <div id="topicoQuestoes" style="margin-top: 40px; padding: 24px 0 0 0; border-top: 2px solid #333;">
+    <h2 style="color: #fff; text-align: center; font-size: 1.6em; margin-bottom: 25px; font-weight: 600; letter-spacing: -0.5px;">Questões</h2>
+    <div style="max-width: 700px; margin: 0 auto;">
+      <div class="questao-expansivel" onclick="toggleQuestaoTabela(0)"><span id="seta-questao-0">▶</span> LÍNGUA PORTUGUESA</div>
+      <div class="questao-conteudo" id="questao-tabela-0"></div>
+      <div class="questao-expansivel" onclick="toggleQuestaoTabela(1)"><span id="seta-questao-1">▶</span> DOUTRINA OPERACIONAL</div>
+      <div class="questao-conteudo" id="questao-tabela-1"></div>
+      <div class="questao-expansivel" onclick="toggleQuestaoTabela(2)"><span id="seta-questao-2">▶</span> LEGISLAÇÃO INSTITUCIONAL</div>
+      <div class="questao-conteudo" id="questao-tabela-2"></div>
+      <div class="questao-expansivel" onclick="toggleQuestaoTabela(3)"><span id="seta-questao-3">▶</span> LEGISLAÇÃO JURÍDICA</div>
+      <div class="questao-conteudo" id="questao-tabela-3"></div>
+    </div>
+  </div>
 
   <script>
     const materias = [
@@ -961,6 +1071,82 @@
     // Inicializar a lista
     carregarEstado();
     atualizarLista();
+
+    // Dados das tabelas de questões (não persistente)
+    const questoesTabelas = [[], [], [], []];
+
+    function toggleQuestaoTabela(idx) {
+      const conteudo = document.getElementById('questao-tabela-' + idx);
+      const seta = document.getElementById('seta-questao-' + idx);
+      if (conteudo.classList.contains('ativa')) {
+        conteudo.classList.remove('ativa');
+        seta.innerText = '▼';
+      } else {
+        conteudo.classList.add('ativa');
+        seta.innerText = '▲';
+        renderQuestaoTabela(idx);
+      }
+    }
+
+    function renderQuestaoTabela(idx) {
+      const tabela = questoesTabelas[idx];
+      let html = `<table class='questao-tabela'>
+        <thead>
+          <tr>
+            <th>Tópico</th>
+            <th>Quantidade de Questões</th>
+            <th>Acertos</th>
+            <th>% de Acertos</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>`;
+      tabela.forEach((linha, i) => {
+        const total = Number(linha.qtd) || 0;
+        const acertos = Number(linha.acertos) || 0;
+        let percent = total > 0 ? ((acertos / total) * 100) : 0;
+        percent = percent.toFixed(1);
+        let percentClass = '';
+        if (percent >= 70) percentClass = 'percent-verde';
+        else if (percent >= 60) percentClass = 'percent-amarelo';
+        else percentClass = 'percent-vermelho';
+        html += `<tr>
+          <td><input type='text' value='${linha.topico || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"topico",this.value)'></td>
+          <td><input type='number' min='0' value='${linha.qtd || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"qtd",this.value)'></td>
+          <td><input type='number' min='0' value='${linha.acertos || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"acertos",this.value)'></td>
+          <td class='${percentClass}'>${percent}%</td>
+          <td><button class='btn-remover' onclick='removerLinhaQuestaoTabela(${idx},${i})'>✕</button></td>
+        </tr>`;
+      });
+      html += `</tbody></table>
+        <button class='btn-adicionar' onclick='adicionarLinhaQuestaoTabela(${idx})'>Adicionar Linha</button>`;
+      document.getElementById('questao-tabela-' + idx).innerHTML = html;
+    }
+
+    function adicionarLinhaQuestaoTabela(idx) {
+      questoesTabelas[idx].push({ topico: '', qtd: '', acertos: '', erros: '' });
+      renderQuestaoTabela(idx);
+    }
+
+    function removerLinhaQuestaoTabela(idx, i) {
+      questoesTabelas[idx].splice(i, 1);
+      renderQuestaoTabela(idx);
+    }
+
+    function atualizaQuestaoTabela(idx, i, campo, valor) {
+      questoesTabelas[idx][i][campo] = valor;
+      renderQuestaoTabela(idx);
+    }
+
+    // Ao abrir a página, garantir que todas as tabelas de questões estejam recolhidas
+    for (let i = 0; i < 4; i++) {
+      const conteudo = document.getElementById('questao-tabela-' + i);
+      const seta = document.getElementById('seta-questao-' + i);
+      if (conteudo && seta) {
+        conteudo.classList.remove('ativa');
+        seta.innerText = '▶';
+      }
+    }
   </script>
 </body>
 </html>
