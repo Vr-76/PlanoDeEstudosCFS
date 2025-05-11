@@ -3,10 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>Plano de Estudos - CFS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&family=Open+Sans:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { 
-      font-family: 'Inter', sans-serif;
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      background: url('FundoBravo.jpg') no-repeat center center fixed;
+      background-size: cover;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+    body {
+      position: relative;
+      z-index: 1;
+      font-family: 'Montserrat', 'Roboto', 'Open Sans', 'Inter', Arial, sans-serif;
       padding: 20px;
       max-width: 1400px;
       margin: 0;
@@ -133,15 +145,22 @@
       text-align: center;
     }
     .item {
-      margin-left: 35px;
+      background: rgba(30,30,30,0.75);
+      border-left: 3px solid #007acc;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
       padding: 6px;
-      border-left: 2px solid #404040;
       font-size: 0.8em;
       line-height: 1.35;
       color: #d4d4d4;
     }
     .topico {
-      margin-left: 50px;
+      background: rgba(40,40,40,0.7);
+      border-left: 3px solid #2ecc71;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
       padding: 4px;
       color: #a0a0a0;
       font-size: 0.8em;
@@ -221,7 +240,46 @@
     }
     .progresso-texto {
       min-width: 45px;
-      text-align: right;
+      text-align: left;
+      font-weight: bold;
+      color: #2ecc71;
+      margin-left: 10px;
+      margin-right: 10px;
+      background: none;
+      position: static;
+    }
+    .botoes-materia {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      margin-left: 0;
+      background: none !important;
+      padding: 8px 0 4px 0;
+    }
+    .btn-reset, .btn-concluir, .btn-limpar {
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 3px 10px;
+      font-size: 0.8em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-reset:hover, .btn-concluir:hover, .btn-limpar:hover {
+      background: #007acc;
+    }
+    .btn-concluir, .btn-limpar {
+      background: #fff !important;
+      color: #222 !important;
+      border: 1px solid #bbb;
+      font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-concluir:hover, .btn-limpar:hover {
+      background: #f0f0f0 !important;
+      color: #007acc !important;
+      border: 1px solid #007acc;
     }
     /* Responsividade para celular */
     @media (max-width: 700px) {
@@ -740,10 +798,14 @@
               <div class="progresso-bar">
                 <div class="progresso-fill" style="width: ${progresso}%"></div>
               </div>
-              <span class="progresso-texto">${progresso}%</span>
             </div>
+            <span class="progresso-texto">${progresso}%</span>
           </div>
           <div id="materia-${materiaIndex}-conteudo" class="materia-conteudo">
+            <div class="botoes-materia">
+              <button class="btn-concluir" onclick="concluirMateria(${materiaIndex})">Concluir</button>
+              <button class="btn-limpar" onclick="limparMateria(${materiaIndex})">Limpar</button>
+            </div>
         `;
 
         materia.leis.forEach((lei, leiIndex) => {
@@ -812,6 +874,81 @@
       if (materias[materiaIndex].leis[leiIndex].revisoes > 0) {
         materias[materiaIndex].leis[leiIndex].revisoes--;
         materias[materiaIndex].leis[leiIndex].datasEstudo.pop();
+        salvarEstado();
+        atualizarLista();
+      }
+    }
+
+    function resetarTudo() {
+      if (confirm('Tem certeza que deseja resetar TODO o progresso?')) {
+        materias.forEach(materia => {
+          materia.leis.forEach(lei => {
+            lei.estudada = false;
+            lei.dataEstudo = null;
+            lei.revisoes = 0;
+            lei.datasEstudo = [];
+            if (lei.itens) {
+              lei.itens.forEach(item => {
+                item.estudada = false;
+                item.dataEstudo = null;
+                if (item.topicos) {
+                  item.topicos.forEach(topico => {
+                    topico.estudada = false;
+                    topico.dataEstudo = null;
+                  });
+                }
+              });
+            }
+          });
+        });
+        salvarEstado();
+        atualizarLista();
+      }
+    }
+
+    function concluirMateria(materiaIndex) {
+      if (confirm('Marcar toda a matéria como concluída?')) {
+        materias[materiaIndex].leis.forEach(lei => {
+          lei.estudada = true;
+          lei.dataEstudo = new Date().toLocaleDateString('pt-BR');
+          if (lei.itens) {
+            lei.itens.forEach(item => {
+              item.estudada = true;
+              item.dataEstudo = new Date().toLocaleDateString('pt-BR');
+              if (item.topicos) {
+                item.topicos.forEach(topico => {
+                  topico.estudada = true;
+                  topico.dataEstudo = new Date().toLocaleDateString('pt-BR');
+                });
+              }
+            });
+          }
+        });
+        salvarEstado();
+        atualizarLista();
+      }
+    }
+
+    function limparMateria(materiaIndex) {
+      if (confirm('Limpar toda a matéria?')) {
+        materias[materiaIndex].leis.forEach(lei => {
+          lei.estudada = false;
+          lei.dataEstudo = null;
+          lei.revisoes = 0;
+          lei.datasEstudo = [];
+          if (lei.itens) {
+            lei.itens.forEach(item => {
+              item.estudada = false;
+              item.dataEstudo = null;
+              if (item.topicos) {
+                item.topicos.forEach(topico => {
+                  topico.estudada = false;
+                  topico.dataEstudo = null;
+                });
+              }
+            });
+          }
+        });
         salvarEstado();
         atualizarLista();
       }
