@@ -907,51 +907,55 @@
     }
 
     function concluirMateria(materiaIndex) {
-      if (confirm('Marcar toda a matéria como concluída?')) {
-        materias[materiaIndex].leis.forEach(lei => {
-          lei.estudada = true;
-          lei.dataEstudo = new Date().toLocaleDateString('pt-BR');
-          if (lei.itens) {
-            lei.itens.forEach(item => {
-              item.estudada = true;
-              item.dataEstudo = new Date().toLocaleDateString('pt-BR');
-              if (item.topicos) {
-                item.topicos.forEach(topico => {
-                  topico.estudada = true;
-                  topico.dataEstudo = new Date().toLocaleDateString('pt-BR');
-                });
-              }
-            });
-          }
-        });
-        salvarEstado();
-        atualizarLista();
-      }
+      // Salva a posição de rolagem
+      const scrollY = window.scrollY;
+      materias[materiaIndex].leis.forEach(lei => {
+        lei.estudada = true;
+        lei.dataEstudo = new Date().toLocaleDateString('pt-BR');
+        if (lei.itens) {
+          lei.itens.forEach(item => {
+            item.estudada = true;
+            item.dataEstudo = new Date().toLocaleDateString('pt-BR');
+            if (item.topicos) {
+              item.topicos.forEach(topico => {
+                topico.estudada = true;
+                topico.dataEstudo = new Date().toLocaleDateString('pt-BR');
+              });
+            }
+          });
+        }
+      });
+      salvarEstado();
+      atualizarLista();
+      // Restaura a posição de rolagem
+      window.scrollTo({ top: scrollY });
     }
 
     function limparMateria(materiaIndex) {
-      if (confirm('Limpar toda a matéria?')) {
-        materias[materiaIndex].leis.forEach(lei => {
-          lei.estudada = false;
-          lei.dataEstudo = null;
-          lei.revisoes = 0;
-          lei.datasEstudo = [];
-          if (lei.itens) {
-            lei.itens.forEach(item => {
-              item.estudada = false;
-              item.dataEstudo = null;
-              if (item.topicos) {
-                item.topicos.forEach(topico => {
-                  topico.estudada = false;
-                  topico.dataEstudo = null;
-                });
-              }
-            });
-          }
-        });
-        salvarEstado();
-        atualizarLista();
-      }
+      // Salva a posição de rolagem
+      const scrollY = window.scrollY;
+      materias[materiaIndex].leis.forEach(lei => {
+        lei.estudada = false;
+        lei.dataEstudo = null;
+        lei.revisoes = 0;
+        lei.datasEstudo = [];
+        if (lei.itens) {
+          lei.itens.forEach(item => {
+            item.estudada = false;
+            item.dataEstudo = null;
+            if (item.topicos) {
+              item.topicos.forEach(topico => {
+                topico.estudada = false;
+                topico.dataEstudo = null;
+              });
+            }
+          });
+        }
+      });
+      salvarEstado();
+      atualizarLista();
+      // Restaura a posição de rolagem
+      window.scrollTo({ top: scrollY });
     }
 
     // Inicializar a lista
