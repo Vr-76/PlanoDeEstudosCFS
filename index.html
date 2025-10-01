@@ -5,16 +5,7 @@
   <title>Plano de Estudos - CFS</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&family=Open+Sans:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 0;
-      background: url('FundoBravo.jpg') no-repeat center center fixed;
-      background-size: cover;
-      opacity: 0.1;
-      pointer-events: none;
-    }
+    /* Imagem de fundo removida */
     body {
       position: relative;
       z-index: 1;
@@ -26,7 +17,7 @@
       color: #d4d4d4;
     }
     h1 {
-      color: #e0e0e0;
+      color: rgba(255,255,255,0.9);
       text-align: center;
       margin-bottom: 25px;
       font-weight: 600;
@@ -426,7 +417,7 @@
   
   <div id="listaMaterias"></div>
   <div id="topicoQuestoes" style="margin-top: 40px; padding: 24px 0 0 0; border-top: 2px solid #333;">
-    <h2 style="color: #fff; text-align: center; font-size: 1.6em; margin-bottom: 25px; font-weight: 600; letter-spacing: -0.5px;">Questões</h2>
+    <h2 style="color: rgba(255,255,255,0.9); text-align: center; font-size: 1.6em; margin-bottom: 25px; font-weight: 600; letter-spacing: -0.5px;">Questões</h2>
     <div style="max-width: 700px; margin: 0 auto;">
       <div class="questao-expansivel" onclick="toggleQuestaoTabela(0)"><span id="seta-questao-0">▶</span> LÍNGUA PORTUGUESA</div>
       <div class="questao-conteudo" id="questao-tabela-0"></div>
@@ -827,14 +818,24 @@
       }
     ];
 
+    // Estado de expansão das matérias (false = fechado, true = aberto)
+    let expandedMaterias = [];
+    // Garantir que o tamanho acompanha a quantidade de matérias
+    if (!expandedMaterias.length || expandedMaterias.length !== materias.length) {
+      expandedMaterias = new Array(materias.length).fill(false);
+    }
+
     function toggleMateria(materiaIndex) {
       const conteudo = document.getElementById(`materia-${materiaIndex}-conteudo`);
       const button = document.getElementById(`toggle-${materiaIndex}`);
       conteudo.classList.toggle('hidden');
       button.classList.toggle('collapsed');
+      // Atualiza o estado global conforme o DOM após o toggle
+      expandedMaterias[materiaIndex] = !conteudo.classList.contains('hidden');
     }
 
     function marcarComoEstudada(tipo, materiaIndex, leiIndex = null, itemIndex = null, topicoIndex = null) {
+      const scrollY = window.scrollY;
       const data = new Date().toLocaleDateString('pt-BR');
       switch(tipo) {
         case 'lei':
@@ -852,6 +853,7 @@
       }
       salvarEstado();
       atualizarLista();
+      window.scrollTo({ top: scrollY });
     }
 
     function salvarEstado() {
@@ -902,7 +904,7 @@
         
         let html = `
           <div class="materia-header">
-            <button id="toggle-${materiaIndex}" class="toggle-button" onclick="toggleMateria(${materiaIndex})"></button>
+            <button id="toggle-${materiaIndex}" class="toggle-button${expandedMaterias[materiaIndex] ? '' : ' collapsed'}" onclick="toggleMateria(${materiaIndex})"></button>
             <div class="materia-titulo">${materia.nome}</div>
             <div class="progresso-container">
               <div class="progresso-bar">
@@ -911,8 +913,8 @@
             </div>
             <span class="progresso-texto">${progresso}%</span>
           </div>
-          <div id="materia-${materiaIndex}-conteudo" class="materia-conteudo">
-            <div class="botoes-materia">
+          <div id="materia-${materiaIndex}-conteudo" class="materia-conteudo${expandedMaterias[materiaIndex] ? '' : ' hidden'}">
+            <div class="botoes-materia" style="position: sticky; top: 0; z-index: 2; background: none !important; padding: 8px 0 4px 0; display: flex; gap: 8px; justify-content: flex-end;">
               <button class="btn-concluir" onclick="concluirMateria(${materiaIndex})">Concluir</button>
               <button class="btn-limpar" onclick="limparMateria(${materiaIndex})">Limpar</button>
             </div>
@@ -968,6 +970,7 @@
     }
 
     function incrementarRevisao(materiaIndex, leiIndex) {
+      const scrollY = window.scrollY;
       if (!materias[materiaIndex].leis[leiIndex].revisoes) {
         materias[materiaIndex].leis[leiIndex].revisoes = 0;
         materias[materiaIndex].leis[leiIndex].datasEstudo = [];
@@ -977,15 +980,18 @@
         materias[materiaIndex].leis[leiIndex].datasEstudo.push(new Date().toLocaleDateString('pt-BR'));
         salvarEstado();
         atualizarLista();
+        window.scrollTo({ top: scrollY });
       }
     }
 
     function decrementarRevisao(materiaIndex, leiIndex) {
+      const scrollY = window.scrollY;
       if (materias[materiaIndex].leis[leiIndex].revisoes > 0) {
         materias[materiaIndex].leis[leiIndex].revisoes--;
         materias[materiaIndex].leis[leiIndex].datasEstudo.pop();
         salvarEstado();
         atualizarLista();
+        window.scrollTo({ top: scrollY });
       }
     }
 
@@ -1076,6 +1082,7 @@
     const questoesTabelas = [[], [], [], []];
 
     function toggleQuestaoTabela(idx) {
+      const scrollY = window.scrollY;
       const conteudo = document.getElementById('questao-tabela-' + idx);
       const seta = document.getElementById('seta-questao-' + idx);
       if (conteudo.classList.contains('ativa')) {
@@ -1086,6 +1093,7 @@
         seta.innerText = '▲';
         renderQuestaoTabela(idx);
       }
+      window.scrollTo({ top: scrollY });
     }
 
     function renderQuestaoTabela(idx) {
@@ -1124,18 +1132,24 @@
     }
 
     function adicionarLinhaQuestaoTabela(idx) {
-      questoesTabelas[idx].push({ topico: '', qtd: '', acertos: '', erros: '' });
+      const scrollY = window.scrollY;
+      questoesTabelas[idx].push({ topico: '', qtd: '', acertos: '' });
       renderQuestaoTabela(idx);
+      window.scrollTo({ top: scrollY });
     }
 
     function removerLinhaQuestaoTabela(idx, i) {
+      const scrollY = window.scrollY;
       questoesTabelas[idx].splice(i, 1);
       renderQuestaoTabela(idx);
+      window.scrollTo({ top: scrollY });
     }
 
     function atualizaQuestaoTabela(idx, i, campo, valor) {
+      const scrollY = window.scrollY;
       questoesTabelas[idx][i][campo] = valor;
       renderQuestaoTabela(idx);
+      window.scrollTo({ top: scrollY });
     }
 
     // Ao abrir a página, garantir que todas as tabelas de questões estejam recolhidas
