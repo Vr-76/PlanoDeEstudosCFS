@@ -681,6 +681,16 @@
             nome: "2.17 Diretriz de Segurança para o Emprego Operacional",
             estudada: false,
             itens: []
+          },
+          {
+            nome: "2.18 DIRETRIZ Nº 3.02.008-2025 CG - PORTFÓLIO DE SERVIÇOS OPERACIONAIS",
+            estudada: false,
+            itens: []
+          },
+          {
+            nome: "2.19 Proteção à Mulher - SEPARATA nr 4 de 15_01_2026",
+            estudada: false,
+            itens: []
           }
         ]
       },
@@ -1078,8 +1088,28 @@
     carregarEstado();
     atualizarLista();
 
-    // Dados das tabelas de questões (não persistente)
-    const questoesTabelas = [[], [], [], []];
+    // Dados das tabelas de questões (com persistência)
+    let questoesTabelas = [[], [], [], []];
+
+    function salvarQuestoesEstado() {
+      localStorage.setItem('estadoQuestoes', JSON.stringify(questoesTabelas));
+    }
+
+    function carregarQuestoesEstado() {
+      const estadoSalvo = localStorage.getItem('estadoQuestoes');
+      if (estadoSalvo) {
+        try {
+          const dados = JSON.parse(estadoSalvo);
+          if (Array.isArray(dados) && dados.length === questoesTabelas.length) {
+            questoesTabelas = dados.map(tabela =>
+              Array.isArray(tabela) ? tabela : []
+            );
+          }
+        } catch (e) {
+          console.error('Erro ao carregar estado das questões:', e);
+        }
+      }
+    }
 
     function toggleQuestaoTabela(idx) {
       const scrollY = window.scrollY;
@@ -1105,6 +1135,7 @@
             <th>Quantidade de Questões</th>
             <th>Acertos</th>
             <th>% de Acertos</th>
+            <th>Datas das alterações</th>
             <th></th>
           </tr>
         </thead>
@@ -1118,11 +1149,16 @@
         if (percent >= 70) percentClass = 'percent-verde';
         else if (percent >= 60) percentClass = 'percent-amarelo';
         else percentClass = 'percent-vermelho';
+
+        const datas = Array.isArray(linha.datas) ? linha.datas : [];
+        const datasTexto = datas.length > 0 ? `(${datas.join(', ')})` : '';
+
         html += `<tr>
           <td><input type='text' value='${linha.topico || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"topico",this.value)'></td>
           <td><input type='number' min='0' value='${linha.qtd || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"qtd",this.value)'></td>
           <td><input type='number' min='0' value='${linha.acertos || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"acertos",this.value)'></td>
           <td class='${percentClass}'>${percent}%</td>
+          <td><span class="data-estudo">${datasTexto}</span></td>
           <td><button class='btn-remover' onclick='removerLinhaQuestaoTabela(${idx},${i})'>✕</button></td>
         </tr>`;
       });
@@ -1133,7 +1169,9 @@
 
     function adicionarLinhaQuestaoTabela(idx) {
       const scrollY = window.scrollY;
-      questoesTabelas[idx].push({ topico: '', qtd: '', acertos: '' });
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      questoesTabelas[idx].push({ topico: '', qtd: '', acertos: '', datas: [hoje] });
+      salvarQuestoesEstado();
       renderQuestaoTabela(idx);
       window.scrollTo({ top: scrollY });
     }
@@ -1141,18 +1179,34 @@
     function removerLinhaQuestaoTabela(idx, i) {
       const scrollY = window.scrollY;
       questoesTabelas[idx].splice(i, 1);
+      salvarQuestoesEstado();
       renderQuestaoTabela(idx);
       window.scrollTo({ top: scrollY });
     }
 
     function atualizaQuestaoTabela(idx, i, campo, valor) {
       const scrollY = window.scrollY;
-      questoesTabelas[idx][i][campo] = valor;
+      const linha = questoesTabelas[idx][i];
+      const valorAnterior = linha[campo];
+      linha[campo] = valor;
+
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      if (!Array.isArray(linha.datas)) {
+        linha.datas = [];
+      }
+      if (valorAnterior !== valor) {
+        if (linha.datas[linha.datas.length - 1] !== hoje) {
+          linha.datas.push(hoje);
+        }
+      }
+
+      salvarQuestoesEstado();
       renderQuestaoTabela(idx);
       window.scrollTo({ top: scrollY });
     }
 
-    // Ao abrir a página, garantir que todas as tabelas de questões estejam recolhidas
+    // Ao abrir a página, carregar estado das questões e garantir que todas as tabelas estejam recolhidas
+    carregarQuestoesEstado();
     for (let i = 0; i < 4; i++) {
       const conteudo = document.getElementById('questao-tabela-' + i);
       const seta = document.getElementById('seta-questao-' + i);
