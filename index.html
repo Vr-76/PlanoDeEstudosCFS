@@ -345,7 +345,8 @@
       font-size: 0.97em;
       text-align: center;
     }
-    .questao-tabela .btn-remover {
+    .questao-tabela .btn-remover,
+    .questao-tabela .btn-mover {
       background: #c0392b;
       color: #fff;
       border: none;
@@ -355,8 +356,15 @@
       font-size: 0.95em;
       margin-left: 2px;
     }
-    .questao-tabela .btn-remover:hover {
+    .questao-tabela .btn-remover:hover,
+    .questao-tabela .btn-mover:hover {
       background: #e74c3c;
+    }
+    .questao-tabela tr[draggable="true"] {
+      cursor: grab;
+    }
+    .questao-tabela tr.arrastando {
+      opacity: 0.6;
     }
     .questao-tabela .btn-adicionar {
       background: #007acc;
@@ -1126,6 +1134,9 @@
       window.scrollTo({ top: scrollY });
     }
 
+    let dragTabelaIndex = null;
+    let dragLinhaIndex = null;
+
     function renderQuestaoTabela(idx) {
       const tabela = questoesTabelas[idx];
       let html = `<table class='questao-tabela'>
@@ -1136,6 +1147,7 @@
             <th>Acertos</th>
             <th>% de Acertos</th>
             <th>Datas das alterações</th>
+            <th>Ordem</th>
             <th></th>
           </tr>
         </thead>
@@ -1153,12 +1165,19 @@
         const datas = Array.isArray(linha.datas) ? linha.datas : [];
         const datasTexto = datas.length > 0 ? `(${datas.join(', ')})` : '';
 
-        html += `<tr>
+        html += `<tr draggable="true"
+                        ondragstart="iniciarArrasteQuestao(${idx},${i}, event)"
+                        ondragover="permitirArrasteQuestao(event)"
+                        ondrop="soltarQuestaoLinha(${idx},${i}, event)">
           <td><input type='text' value='${linha.topico || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"topico",this.value)'></td>
           <td><input type='number' min='0' value='${linha.qtd || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"qtd",this.value)'></td>
           <td><input type='number' min='0' value='${linha.acertos || ''}' onchange='atualizaQuestaoTabela(${idx},${i},"acertos",this.value)'></td>
           <td class='${percentClass}'>${percent}%</td>
           <td><span class="data-estudo">${datasTexto}</span></td>
+          <td>
+            <button class='btn-mover' onclick='moverLinhaQuestaoTabela(${idx},${i},-1)' ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button class='btn-mover' onclick='moverLinhaQuestaoTabela(${idx},${i},1)' ${i === tabela.length - 1 ? 'disabled' : ''}>↓</button>
+          </td>
           <td><button class='btn-remover' onclick='removerLinhaQuestaoTabela(${idx},${i})'>✕</button></td>
         </tr>`;
       });
@@ -1179,6 +1198,52 @@
     function removerLinhaQuestaoTabela(idx, i) {
       const scrollY = window.scrollY;
       questoesTabelas[idx].splice(i, 1);
+      salvarQuestoesEstado();
+      renderQuestaoTabela(idx);
+      window.scrollTo({ top: scrollY });
+    }
+
+    function moverLinhaQuestaoTabela(idx, i, direcao) {
+      const scrollY = window.scrollY;
+      const novaPos = i + direcao;
+      const tabela = questoesTabelas[idx];
+      if (novaPos < 0 || novaPos >= tabela.length) return;
+      const [linha] = tabela.splice(i, 1);
+      tabela.splice(novaPos, 0, linha);
+      salvarQuestoesEstado();
+      renderQuestaoTabela(idx);
+      window.scrollTo({ top: scrollY });
+    }
+
+    function iniciarArrasteQuestao(idx, i, event) {
+      dragTabelaIndex = idx;
+      dragLinhaIndex = i;
+      event.dataTransfer.effectAllowed = 'move';
+      const row = event.target.closest('tr');
+      if (row) row.classList.add('arrastando');
+    }
+
+    function permitirArrasteQuestao(event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    function soltarQuestaoLinha(idx, i, event) {
+      event.preventDefault();
+      const scrollY = window.scrollY;
+      const tabela = questoesTabelas[idx];
+      const rows = document.querySelectorAll('#questao-tabela-' + idx + ' tr.arrastando');
+      rows.forEach(r => r.classList.remove('arrastando'));
+      if (dragTabelaIndex === null || dragLinhaIndex === null) return;
+      if (dragTabelaIndex !== idx || dragLinhaIndex === i) {
+        dragTabelaIndex = null;
+        dragLinhaIndex = null;
+        return;
+      }
+      const [linha] = tabela.splice(dragLinhaIndex, 1);
+      tabela.splice(i, 0, linha);
+      dragTabelaIndex = null;
+      dragLinhaIndex = null;
       salvarQuestoesEstado();
       renderQuestaoTabela(idx);
       window.scrollTo({ top: scrollY });
